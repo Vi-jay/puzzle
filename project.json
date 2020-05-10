@@ -1,0 +1,9 @@
+{
+  "engine": "cocos-creator-js",
+  "packages": "packages",
+  "name": "puzzle",
+  "uuid": "96502e6e-f0e5-44cc-a8b9-93678bd06f71",
+  "version": "2.3.3",
+  "id": "32a8ea10-50b0-4507-88da-beb1cf5c5351",
+  "isNew": false
+}
