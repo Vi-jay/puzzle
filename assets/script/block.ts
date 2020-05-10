@@ -54,26 +54,46 @@ export default class Block extends cc.Component {
         let preParent;
         const world = cc.find("Canvas/wrap");
         const stage = cc.find("Canvas/wrap/stage");
-        puzzle.on(EventType.TOUCH_START, (event: cc.Touch) => {
+        let isMoving= false;
+        const touchStart = () => {
             preParent = puzzle.parent;
             puzzle.zIndex = 99;
             puzzle.opacity = 128;
             if (preParent !== this.puzzleContainer) return;
-
             //放大
             this.changeNodeSize(this.nodeSize)
             //加入世界坐标
             puzzle.setPosition(convertToWorldPos(puzzle));
             puzzle.parent = world;
-        })
+        };
         puzzle.on(EventType.TOUCH_MOVE, (event: cc.Touch) => {
+            const pos = this.puzzleContainer.convertToNodeSpaceAR(event.getLocation());
+            if (-pos.y>0)return;
+            touchStart();
+            isMoving=true;
             const delta = event.getDelta();
             puzzle.x += delta.x;
             puzzle.y += delta.y;
         })
+        //TODO 判断双击的情况
         puzzle.on(EventType.TOUCH_END, (event) => {
             puzzle.opacity = 255;
             puzzle.zIndex = 0;
+            //加入stage
+            if (puzzle.parent !== stage) {
+                const IN_STAGE = stage.getBoundingBox().contains(puzzle.getPosition());
+                if (!IN_STAGE) return this.backToBar();
+                let pos = convertToNodePos(stage, puzzle);
+                puzzle.setPosition(pos);
+                puzzle.parent = stage;
+            }
+            puzzle.setPosition(this.calculatePos())
+        });
+        puzzle.on(EventType.TOUCH_CANCEL, (event) => {
+            if (!isMoving)return ;
+            puzzle.opacity = 255;
+            puzzle.zIndex = 0;
+            isMoving=false;
             //加入stage
             if (puzzle.parent !== stage) {
                 const IN_STAGE = stage.getBoundingBox().contains(puzzle.getPosition());
