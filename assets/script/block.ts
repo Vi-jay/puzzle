@@ -1,37 +1,70 @@
 import EventType = cc.Node.EventType;
 import * as anime from "animejs";
+import Vec2 = cc.Vec2;
+import {convertToNodePos, convertToWorldPos} from "./utils/common";
+import PuzzleBar from "./puzzle-bar";
+import * as _ from "lodash";
 
 const {ccclass, property} = cc._decorator;
 @ccclass
 export default class Block extends cc.Component {
     @property({type: cc.Node})
     picture: cc.Node;
-    blockGrid: cc.Node[][];
+    puzzleBar: PuzzleBar;
     //额定每块大小
     puzzlePicSize = cc.size(300, 300);
     nodeSize = cc.size(300, 300);
-    init(texture: cc.Texture2D, xy: cc.Vec2, blockGrid: cc.Node[][], isSpecial) {
-        this.blockGrid = blockGrid;
-        this.node.setContentSize(this.nodeSize);
+    smallSize = cc.size(200, 200);
+    texture: cc.Texture2D
+    xy: cc.Vec2;
+    puzzleContainer: cc.Node;
+    idx: number;
+    init(texture: cc.Texture2D, xy: cc.Vec2, puzzleBar: PuzzleBar, idx: number) {
+        this.puzzleBar = puzzleBar;
+        this.texture = texture;
+        this.xy = xy;
+        this.idx = idx;
+        this.puzzleContainer = this.node.parent;
+        this.changeNodeSize(this.smallSize);
         //如果是突出的就加大
-        if (isSpecial) {
-            this.node.width += 50;
-            this.node.height += 50
-        }
-        const {width, height} = this.puzzlePicSize;
-        const sprite = this.picture.getComponent(cc.Sprite);
-        sprite.spriteFrame = new cc.SpriteFrame(texture, cc.rect(xy.x * width, xy.y * height, this.node.width, this.node.height));
-        this.node.setPosition(xy.x * width, -xy.y * height);
+        // if (isSpecial) {
+        //     this.node.width += 50;
+        //     this.node.height += 50
+        // }
         return this.node;
     }
     onLoad() {
-        const {node: puzzle} = this;
+        this.initActions();
+    }
+    changeNodeSize(size: cc.Size) {
+        this.node.setContentSize(size);
+        this.picture.setContentSize(size);
         const {width, height} = this.puzzlePicSize;
-        let startPos;
-        puzzle.on(EventType.TOUCH_START, (event) => {
-            startPos = puzzle.position.clone();
-            puzzle.zIndex = 1;
+        const sprite = this.picture.getComponent(cc.Sprite);
+        const xy = this.xy;
+        sprite.spriteFrame = new cc.SpriteFrame(this.texture, cc.rect(xy.x * width, xy.y * height, this.node.width, this.node.height));
+    }
+    backToBar() {
+        this.changeNodeSize(this.smallSize);
+        this.puzzleContainer.insertChild(this.node, this.idx)
+        this.node.setPosition(0, -(125 - this.node.height / 2));
+    }
+    initActions() {
+        const {node: puzzle} = this;
+        let preParent;
+        const world = cc.find("Canvas/wrap");
+        const stage = cc.find("Canvas/wrap/stage");
+        puzzle.on(EventType.TOUCH_START, (event: cc.Touch) => {
+            preParent = puzzle.parent;
+            puzzle.zIndex = 99;
             puzzle.opacity = 128;
+            if (preParent !== this.puzzleContainer) return;
+
+            //放大
+            this.changeNodeSize(this.nodeSize)
+            //加入世界坐标
+            puzzle.setPosition(convertToWorldPos(puzzle));
+            puzzle.parent = world;
         })
         puzzle.on(EventType.TOUCH_MOVE, (event: cc.Touch) => {
             const delta = event.getDelta();
@@ -41,16 +74,22 @@ export default class Block extends cc.Component {
         puzzle.on(EventType.TOUCH_END, (event) => {
             puzzle.opacity = 255;
             puzzle.zIndex = 0;
-            const [targetX, targetY] = this.getPos2Idx(puzzle.position)
-            if (!this.blockGrid[targetY] || !this.blockGrid[targetY][targetX])
-                return this.changeAnimePos(puzzle, startPos);
-            const exchangeNode = this.blockGrid[targetY][targetX];
-            this.changeAnimePos(exchangeNode, startPos);
-            this.changeAnimePos(puzzle, new cc.Vec2(targetX * width, -targetY * height));
-            this.blockGrid[targetY][targetX] = puzzle;
-            const [startX, startY] = this.getPos2Idx(startPos)
-            this.blockGrid[startY][startX] = exchangeNode;
+            //加入stage
+            if (puzzle.parent !== stage) {
+                const IN_STAGE = stage.getBoundingBox().contains(puzzle.getPosition());
+                if (!IN_STAGE) return this.backToBar();
+                let pos = convertToNodePos(stage, puzzle);
+                puzzle.setPosition(pos);
+                puzzle.parent = stage;
+            }
+            puzzle.setPosition(this.calculatePos())
         })
+    }
+    calculatePos(){
+        const puzzle = this.node;
+        const x = Math.round(puzzle.x/puzzle.width)
+        const y = Math.round(puzzle.y/puzzle.height)
+        return cc.v2(puzzle.width*x,puzzle.height*y)
     }
     changeAnimePos(node: cc.Node, pos: cc.Vec2) {
         anime({
