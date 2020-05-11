@@ -198,6 +198,26 @@
     "picture": {
       "__id__": 2
     },
+    "maskTextures": [
+      {
+        "__uuid__": "7709b6fa-d8a7-4043-a995-75caf64815a8"
+      },
+      {
+        "__uuid__": "8066f2e3-aef0-468d-b22c-aa44d1c66547"
+      },
+      {
+        "__uuid__": "b8afe49d-0eb9-4c7e-85e7-838b848b8c49"
+      },
+      {
+        "__uuid__": "33faeb69-590f-4f93-a581-c0a69ab6bb3f"
+      },
+      {
+        "__uuid__": "8f1d9df5-89f1-4235-ae8c-ee2676d14494"
+      },
+      {
+        "__uuid__": "020aabef-792b-41cf-bca5-46a02ac2f4ad"
+      }
+    ],
     "_id": ""
   },
   {
@@ -214,7 +234,7 @@
       }
     ],
     "_spriteFrame": null,
-    "_type": 0,
+    "_type": 2,
     "_segments": 64,
     "_N$alphaThreshold": 0.1,
     "_N$inverted": false,

@@ -718,6 +718,9 @@
     "picture": {
       "__uuid__": "5a2aefa0-4564-4b21-8a25-58875e1c070a"
     },
+    "scroller": {
+      "__id__": 11
+    },
     "blockPrefab": {
       "__uuid__": "fa378a36-9252-44cc-9d63-551d76b4deb8"
     },

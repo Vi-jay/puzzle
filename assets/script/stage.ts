@@ -9,7 +9,6 @@ export default class Stage extends cc.Component {
     blockPrefab: cc.Prefab;
 
     onLoad() {
-
     }
     start() {
     }
