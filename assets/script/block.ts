@@ -72,7 +72,7 @@ export default class Block extends cc.Component {
     initActions() {
         const {node: puzzle} = this;
         const world = cc.find("Canvas/wrap");
-        const stage = cc.find("Canvas/wrap/stage");
+        const stage = cc.find("Canvas/wrap/stage-bg/stage");
         let isMoving = false;
         this.startPos = cc.v2();
         const getSortIdx = () => this.puzzleContainer.children.findIndex((node) => node === this.node);
@@ -111,8 +111,8 @@ export default class Block extends cc.Component {
             const inTheStage = puzzle.parent === stage;
             if (inTheStage) return this.changeStagePuzzle();
             //如果还没加入stage
-            const IN_STAGE = stage.getBoundingBox().contains(this.getPuzzleCenterVer2());
-            if (!IN_STAGE) return this.backToBar();
+            const IN_STAGE_BOUNDS = stage.parent.getBoundingBox().contains(this.getPuzzleCenterVer2());
+            if (!IN_STAGE_BOUNDS) return this.backToBar();
             let pos = covertToNodePos(stage, puzzle.getPosition());
             puzzle.setPosition(pos);
             puzzle.parent = stage;

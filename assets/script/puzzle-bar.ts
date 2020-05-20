@@ -20,6 +20,7 @@ export default class PuzzleBar extends cc.Component {
     blockCmp = [dir({bottom: 1, right: 1}), dir({bottom: 1}), dir({right: 1})
         , dir(), dir({top: 1}), dir({left: 1, top: 1})];
     onLoad() {
+        this.node.parent.parent.zIndex = 10;
         let idx = 0;
         const stageGrid = [];
         for (let y = 0; y < 3; y++) {
